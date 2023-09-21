@@ -7,7 +7,6 @@ export const InitializePgdbConnection = TypeOrmModule.forRoot(
 );
 
 console.log(process.env.PGDB_PORT, process.env.PGDB_HOST);
-
 export const mapEnvVariables = () => ({
   host: process.env.PGDB_HOST,
   database: {

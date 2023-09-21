@@ -1,5 +1,5 @@
 import { Blog } from 'src/modules/blog-module/entites/blog.entity';
-import { User } from 'src/modules/user-module/entities/users.entity';
+import { User, UserMedia } from 'src/modules/user-module/entities/users.entity';
 import {
   Column,
   CreateDateColumn,
@@ -33,6 +33,8 @@ export class Media {
   created_at: Date;
   @UpdateDateColumn()
   modified_at: Date;
+
+  userMedia: UserMedia;
 }
 
 @Entity()

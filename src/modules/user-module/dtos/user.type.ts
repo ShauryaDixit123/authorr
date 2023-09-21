@@ -5,7 +5,7 @@ export type User = {
   mobile: string;
   password: string;
   role_id: number;
-  is_active: boolean;
   role?: string;
-  is_author?: boolean;
+  is_author: boolean;
+  book_url?: string;
 };

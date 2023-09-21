@@ -14,7 +14,13 @@ export class UserModuleService {
   ) {}
 
   async createUser(user: UserDTO): Promise<User> {
-    return await this.userRepo.save(user);
+    let userDetails: User;
+    try {
+      userDetails = await this.userRepo.save({ ...user, role: user.role_id });
+    } catch (e) {
+      console.log(e);
+    }
+    return userDetails;
   }
 
   async findUserBy(id: string): Promise<User | null> {
@@ -48,4 +54,22 @@ export class UserModuleService {
       },
     });
   }
+  async findUserRole(id: string) {
+    return await this.userRepo
+      .createQueryBuilder('user')
+      .select('user.role_id')
+      .where('user.id = :id', { id: id })
+      .andWhere('role.id = user.role_id')
+      .innerJoin(Role, 'role')
+      .getOne();
+  }
 }
+
+// {
+//     "first_name":"Shaurya",
+//     "last_name":  "Dixit",
+//     "email" : "shaurd224@gmail.com",
+//     "mobile": "87870000",
+//     "password": "shauryad224",
+//     "is_author": false
+// }

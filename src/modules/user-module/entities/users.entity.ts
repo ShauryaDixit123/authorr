@@ -10,20 +10,6 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Role {
-  @PrimaryGeneratedColumn()
-  id: number;
-  @Column({
-    nullable: false,
-  })
-  name: string;
-  @CreateDateColumn()
-  created_at: Date;
-  @UpdateDateColumn()
-  modified_at: Date;
-}
-
-@Entity()
 export class Tag {
   @PrimaryGeneratedColumn()
   id: number;
@@ -71,14 +57,33 @@ export class User {
     default: false,
   })
   is_verified: boolean;
+  @Column({
+    default: false,
+  })
+  is_active: boolean;
   @Column()
   book_url: string;
-  @OneToMany(() => Role, (role) => role.id)
-  role_id: number;
+  @ManyToOne(() => Role, (role) => role.userRole)
+  role: number;
   @CreateDateColumn()
   created_at: Date;
   @UpdateDateColumn()
   modified_at: Date;
+}
+@Entity()
+export class Role {
+  @PrimaryGeneratedColumn()
+  id: number;
+  @Column({
+    nullable: false,
+  })
+  name: string;
+  @CreateDateColumn()
+  created_at: Date;
+  @UpdateDateColumn()
+  modified_at: Date;
+  @OneToMany(() => User, (user) => user.id)
+  userRole: User[];
 }
 
 @Entity()
