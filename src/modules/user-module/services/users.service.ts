@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Role, User } from '../entities/users.entity';
 import { User as UserDTO } from '../dtos/user.type';
@@ -23,10 +23,17 @@ export class UserModuleService {
     return userDetails;
   }
 
-  async findUserBy(id: string): Promise<User | null> {
+  async findUserById(id: string): Promise<User | null> {
     return this.userRepo.findOne({
       where: {
         id: id,
+      },
+    });
+  }
+  async findUserByEmail(email: string): Promise<User | null> {
+    return this.userRepo.findOne({
+      where: {
+        email: email,
       },
     });
   }

@@ -1,4 +1,6 @@
 export type User = {
+  id: string;
+  user_name: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -8,4 +10,5 @@ export type User = {
   role?: string;
   is_author: boolean;
   book_url?: string;
+  google_id?: string;
 };

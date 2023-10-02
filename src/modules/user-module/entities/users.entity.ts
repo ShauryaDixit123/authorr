@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -39,11 +40,12 @@ export class User {
     unique: true,
     nullable: false,
   })
+  @Index({ unique: true })
   email: string;
   @Column({
     nullable: false,
-    unique: true,
   })
+  @Index()
   mobile: string;
   @Column({
     nullable: false,
@@ -63,6 +65,8 @@ export class User {
   is_active: boolean;
   @Column()
   book_url: string;
+  @Column()
+  user_name: string;
   @ManyToOne(() => Role, (role) => role.userRole)
   role: number;
   @CreateDateColumn()

@@ -27,6 +27,9 @@ class ConfigService {
     const mode = this.getValue('MODE', false);
     return mode != 'DEV';
   }
+  public googleAuthKey() {
+    return this.getValue('GOOGLE_CLIENT_ID', true);
+  }
 
   public initializePgdbConfig(): TypeOrmModuleOptions {
     return {

@@ -1,8 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api');
   await app.listen(process.env.APP_PORT);
   console.log(`Application is running on: ${process.env.APP_PORT}`);
   const server = app.getHttpServer();
@@ -22,4 +24,15 @@ async function bootstrap() {
     .filter((item) => item !== undefined);
   console.log(availableRoutes);
 }
+
+async function redisApp() {
+  NestFactory.createMicroservice(AppModule, {
+    transport: Transport.REDIS,
+    options: {
+      port: process.env.REDIS_PORT,
+      host: process.env.REDIS_HOST,
+    },
+  });
+}
 bootstrap();
+// redisApp();

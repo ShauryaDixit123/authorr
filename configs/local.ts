@@ -8,7 +8,8 @@ export const InitializePgdbConnection = TypeOrmModule.forRoot(
 
 console.log(process.env.PGDB_PORT, process.env.PGDB_HOST);
 export const mapEnvVariables = () => ({
-  host: process.env.PGDB_HOST,
+  tier: process.env.TIER,
+  appPort: process.env.APP_PORT,
   database: {
     port: process.env.PGDB_PORT,
     host: parseInt(process.env.PGDB_HOST, 10) || 5432,
@@ -16,7 +17,17 @@ export const mapEnvVariables = () => ({
     password: process.env.PGDB_PASSWORD,
     database: process.env.PGDB_DATABASE,
   },
+  google: {
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callBackUrl: process.env.GOOGLE_CALLBACK_URL,
+  },
+  jwt: {
+    secret: process.env.JWT_SECRET,
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  },
 });
+
 @Module({
   exports: [InitializePgdbConnection, mapEnvVariables],
 })
