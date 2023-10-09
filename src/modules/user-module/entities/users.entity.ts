@@ -4,8 +4,11 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  JoinColumn,
+  JoinTable,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -64,16 +67,92 @@ export class User {
   })
   is_active: boolean;
   @Column()
-  book_url: string;
-  @Column()
   user_name: string;
   @ManyToOne(() => Role, (role) => role.userRole)
+  @JoinTable()
   role: number;
   @CreateDateColumn()
   created_at: Date;
   @UpdateDateColumn()
   modified_at: Date;
+
+  // constructor(partial: Partial<User>) {
+  //   Object.assign(this, partial);
+  // }
 }
+
+@Entity()
+export class AuthorDetail {
+  @PrimaryGeneratedColumn()
+  id: number;
+  @Column({
+    nullable: false,
+    default: false,
+  })
+  is_author_book: boolean;
+  @Column({
+    default: false,
+  })
+  website_published: boolean;
+  @Column({
+    default: false,
+  })
+  blog_published: boolean;
+  @OneToOne(() => User)
+  @JoinColumn()
+  author: User;
+  @CreateDateColumn()
+  created_at: Date;
+  @UpdateDateColumn()
+  modified_at: Date;
+
+  constructor(partial?: Partial<AuthorDetail>) {
+    Object.assign(this, partial);
+  }
+}
+@Entity()
+export class AuthorDetailsBook {
+  @PrimaryGeneratedColumn()
+  id: number;
+  @ManyToOne(() => AuthorDetail, (author) => author.id)
+  @JoinColumn()
+  author_detail: string;
+  @ManyToOne(() => Book, (book) => book.id)
+  @JoinColumn()
+  book: string;
+  @CreateDateColumn()
+  created_at: Date;
+  @UpdateDateColumn()
+  modified_at: Date;
+}
+
+@Entity()
+export class Book {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+  @Column({
+    nullable: false,
+  })
+  title: string;
+  @Column({
+    nullable: true,
+  })
+  description: string;
+  @Column({
+    nullable: false,
+  })
+  hosted_url: string;
+  @Column({
+    nullable: false,
+    unique: true,
+  })
+  isbn: string;
+  @CreateDateColumn()
+  created_at: Date;
+  @UpdateDateColumn()
+  modified_at: Date;
+}
+
 @Entity()
 export class Role {
   @PrimaryGeneratedColumn()
@@ -86,7 +165,7 @@ export class Role {
   created_at: Date;
   @UpdateDateColumn()
   modified_at: Date;
-  @OneToMany(() => User, (user) => user.id)
+  @OneToMany(() => User, (user) => user.id, { cascade: true })
   userRole: User[];
 }
 
@@ -98,28 +177,6 @@ export class UserSubs {
   sub_id: string;
   @ManyToOne(() => User, (user) => user.id)
   sub_to: string;
-  @CreateDateColumn()
-  created_at: Date;
-  @UpdateDateColumn()
-  modified_at: Date;
-}
-
-@Entity()
-export class UserMedia {
-  @PrimaryGeneratedColumn()
-  id: number;
-  @Column()
-  title: string;
-  @Column()
-  caption: string;
-  @Column()
-  type: string;
-  @Column()
-  s3path: string;
-  @ManyToOne(() => User, (user) => user.id)
-  user: string;
-  @ManyToOne(() => Media, (media) => media.id)
-  media: number;
   @CreateDateColumn()
   created_at: Date;
   @UpdateDateColumn()

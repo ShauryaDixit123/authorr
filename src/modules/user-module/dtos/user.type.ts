@@ -12,3 +12,12 @@ export type User = {
   book_url?: string;
   google_id?: string;
 };
+
+export type BookDTO = {
+  id?: string;
+  title?: string;
+  description?: string;
+  hosted_url?: string;
+  author_id: string;
+  isbn?: string;
+};

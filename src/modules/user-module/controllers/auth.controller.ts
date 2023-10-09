@@ -2,14 +2,12 @@ import {
   Body,
   Controller,
   Post,
-  Request,
   UseGuards,
   Get,
   Req,
   Res,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { AuthGuard } from '@nestjs/passport';
 import { OAuth2Client } from 'google-auth-library';
 import { GoogleAuthGaurd } from '../services/auth/auth.gaurd';
 import { AuthService } from '../services/auth/auth.service';
@@ -23,6 +21,7 @@ import {
 } from '../constants/user.constant';
 import { UserModuleService } from '../services/users.service';
 import { User } from '../entities/users.entity';
+import { MessageError, ServerError } from 'src/common/exceptions/error';
 
 const client = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,
@@ -37,26 +36,22 @@ export class AuthController {
   ) {}
 
   async createUser(body: UserDTO) {
-    let userDetails: User;
-    const user = await this.userService.findUserByEmail(body.email);
-    if (!user) {
-      if (body.is_author) {
-        body.role = AUTHOR_ROLE;
-      } else {
-        body.role = READER_ROLE;
-      }
-      const roleId = await this.userService.findRoleIdByName(
-        body.role || READER_ROLE,
-      );
-      const hashedPassword = await bcrypt.hash(body.password, 10);
-      userDetails = await this.userService.createUser({
-        ...body,
-        book_url: '',
-        password: hashedPassword,
-        role_id: roleId || 1,
-      });
+    let user = await this.userService.findUserByEmail(body.email);
+    if (user) {
+      throw new MessageError(`User with ${body.email} already exists.`);
     }
-    return userDetails;
+    const roleId = await this.userService.findRoleIdByName(
+      body.is_author ? AUTHOR_ROLE : READER_ROLE,
+    );
+    body.role_id = roleId;
+    const hashedPassword = await bcrypt.hash(body.password, 10);
+    body.password = hashedPassword;
+    if (body.is_author) {
+      user = await this.userService.createAuthor({ ...body });
+    } else {
+      user = await this.userService.createUser({ ...body });
+    }
+    return user;
   }
 
   @Post('/google')
@@ -79,7 +74,7 @@ export class AuthController {
     // const token = this.authService.signIn(req.user);
     const userDetails = await this.createUser({
       ...req.user,
-      googleId: req.providerId,
+      googleId: req.user.providerId,
       password: 'authorr-default-password',
       mobile: 'authorr-default-mobile',
     });
@@ -96,13 +91,21 @@ export class AuthController {
   }
   @Post('/signup')
   async signup(@Body() body: UserDTO) {
-    const userDetails = await this.createUser(body);
-    const token = await this.authService.generateToken({
-      sub: userDetails.id,
-      email: userDetails.email,
-    });
+    console.log(body);
+    let user: User;
+    let token;
+    try {
+      user = await this.createUser(body);
+      token = await this.authService.generateToken({
+        sub: user.id,
+        email: user.email,
+      });
+    } catch (e) {
+      new ServerError(e);
+    }
     return {
       token,
+      id: user.id,
     };
   }
   @Post('/signin')
@@ -113,11 +116,10 @@ export class AuthController {
         message: USER_NOT_FOUND,
       };
     }
+    // console.log(bcrypt.)
     const isMatch = await bcrypt.compare(body.password, userDetails.password);
     if (!isMatch) {
-      return {
-        message: WRONG_CREDENTIALS,
-      };
+      new ServerError(WRONG_CREDENTIALS);
     }
     const token = await this.authService.generateToken({
       sub: userDetails.id,

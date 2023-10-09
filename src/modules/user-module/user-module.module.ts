@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { UserController } from './controllers/users.controller';
 import { UserModuleService } from './services/users.service';
 import { MediaController } from '../media-module/controllers/media.controller';
@@ -9,6 +9,8 @@ import { AuthController } from './controllers/auth.controller';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { mapEnvVariables } from 'configs/local';
+import { ConfigService } from '@nestjs/config';
+import { MediaModule } from '../media-module/media-module.module';
 
 const registerJWTModule = JwtModule.register({
   global: true,
@@ -20,14 +22,20 @@ const registerPassportModule = PassportModule.register({
   defaultStrategy: 'google',
 });
 @Module({
-  controllers: [UserController, MediaController, AuthController],
-  providers: [UserModuleService, MediaService, AuthService],
+  controllers: [UserController, AuthController],
+  providers: [UserModuleService, AuthService],
   imports: [
     PassportModule,
+    MediaModule,
     userRepoProviders,
     registerJWTModule,
     registerPassportModule,
   ],
-  exports: [PassportModule],
+  exports: [PassportModule, AuthService],
+})
+@Global()
+@Module({
+  imports: [AuthService],
+  exports: [AuthService],
 })
 export class UserModule {}

@@ -1,11 +1,12 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { DataSourceOptions } from 'typeorm';
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
+
 class ConfigService {
   constructor(private env: { [k: string]: string | undefined }) {}
 
-  private getValue(key: string, throwOnMissing = true): string {
+  public getValue(key: string, throwOnMissing = true): string {
     const value = process.env?.[key];
     if (!value && throwOnMissing) {
       throw new Error(`config error - missing env.${key}`);
