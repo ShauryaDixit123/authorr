@@ -36,21 +36,28 @@ export class AuthController {
   ) {}
 
   async createUser(body: UserDTO) {
-    let user = await this.userService.findUserByEmail(body.email);
-    if (user) {
-      throw new MessageError(`User with ${body.email} already exists.`);
+    let user: User;
+    try {
+      user = await this.userService.findUserByEmail(body.email);
+      if (user) {
+        throw new MessageError(`User with ${body.email} already exists.`);
+      }
+      const userRole = await this.userService.findRoleIdByName(
+        body.is_author ? AUTHOR_ROLE : READER_ROLE,
+      );
+      body.role = userRole.name;
+      const hashedPassword = await bcrypt.hash(body.password, 10);
+      body.password = hashedPassword;
+      if (body.is_author) {
+        user = await this.userService.createAuthor({ ...body });
+      } else {
+        user = await this.userService.createUser({ ...body });
+      }
+    } catch (e) {
+      throw new ServerError(e.message);
     }
-    const roleId = await this.userService.findRoleIdByName(
-      body.is_author ? AUTHOR_ROLE : READER_ROLE,
-    );
-    body.role_id = roleId;
-    const hashedPassword = await bcrypt.hash(body.password, 10);
-    body.password = hashedPassword;
-    if (body.is_author) {
-      user = await this.userService.createAuthor({ ...body });
-    } else {
-      user = await this.userService.createUser({ ...body });
-    }
+    if (user.id == '') throw new ServerError('User not created');
+
     return user;
   }
 
@@ -81,6 +88,7 @@ export class AuthController {
     const token = await this.authService.generateToken({
       sub: userDetails.id,
       email: userDetails.email,
+      role: userDetails.role,
     });
     res.cookie('ACCESS_TOKEN', token, {
       maxAge: 2592000000,
@@ -96,9 +104,11 @@ export class AuthController {
     let token;
     try {
       user = await this.createUser(body);
+      console.log(user.role, user);
       token = await this.authService.generateToken({
         sub: user.id,
         email: user.email,
+        role: user.role,
       });
     } catch (e) {
       new ServerError(e);
@@ -124,6 +134,7 @@ export class AuthController {
     const token = await this.authService.generateToken({
       sub: userDetails.id,
       email: userDetails.email,
+      role: userDetails.role.name,
     });
     return {
       token,

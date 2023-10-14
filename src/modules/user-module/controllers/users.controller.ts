@@ -19,7 +19,10 @@ import {
 import * as bcrypt from 'bcrypt';
 import { AuthService } from '../services/auth/auth.service';
 import { ClientProxy } from '@nestjs/microservices';
-import { JWTActivateGuard } from '../services/auth/auth.gaurd';
+import {
+  AuthorCanActivateGuard,
+  JWTActivateGuard,
+} from '../services/auth/auth.gaurd';
 import { ServerError } from 'src/common/exceptions/error';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthorDetail, User } from '../entities/users.entity';
@@ -59,7 +62,7 @@ export class UserController {
       ...body,
       book_url: '',
       password: hashedPassword,
-      role_id: roleId || 1,
+      role: roleId.name,
     });
     // const res = await this.client.emit(ADD_TOKEN, { ...body });
     // console.log('res', res);
@@ -95,7 +98,7 @@ export class UserController {
     return userDetails;
   }
   @Post('author/add/book')
-  @UseGuards(JWTActivateGuard)
+  @UseGuards(AuthorCanActivateGuard)
   async verifyAuthorAddBook(@Body() body: BookDTO) {
     let book = await this.userService.findBookByISBN(body.isbn);
     if (!book) {

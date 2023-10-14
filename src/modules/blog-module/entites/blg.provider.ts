@@ -3,11 +3,13 @@ import {
   Blog,
   BlogComment,
   BlogContent,
+  BlogHeirarchy,
   BlogLike,
+  BlogMedia,
   BlogTag,
   ContentType,
 } from './blog.entity';
-import { Style, StyleContent } from './style.entity';
+import { Style, StyleBlogContent } from './style.entity';
 
 export const blogRepoProviders = TypeOrmModule.forFeature([
   Blog,
@@ -17,5 +19,7 @@ export const blogRepoProviders = TypeOrmModule.forFeature([
   BlogComment,
   BlogTag,
   Style,
-  StyleContent,
+  StyleBlogContent,
+  BlogMedia,
+  BlogHeirarchy,
 ]);

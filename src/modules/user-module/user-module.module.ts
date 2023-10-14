@@ -11,6 +11,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { mapEnvVariables } from 'configs/local';
 import { ConfigService } from '@nestjs/config';
 import { MediaModule } from '../media-module/media-module.module';
+import { AuthorCanActivateGuard } from './services/auth/auth.gaurd';
 
 const registerJWTModule = JwtModule.register({
   global: true,
@@ -31,11 +32,11 @@ const registerPassportModule = PassportModule.register({
     registerJWTModule,
     registerPassportModule,
   ],
-  exports: [PassportModule, AuthService],
+  exports: [PassportModule, AuthService, UserModuleService],
 })
 @Global()
 @Module({
   imports: [AuthService],
-  exports: [AuthService],
+  exports: [AuthService, UserModule],
 })
 export class UserModule {}

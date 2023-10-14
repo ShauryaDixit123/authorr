@@ -2,22 +2,29 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   ManyToOne,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { BlogContent } from './blog.entity';
+import { BlogContent, ContentType } from './blog.entity';
 
 @Entity()
 export class Style {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @Index('STYLE_PK_index', { unique: true })
+  @PrimaryColumn({
+    unique: true,
+  })
+  id: string; // id will be comnination of style and type saperated by . or '-'
   @Column({
     nullable: false,
   })
   style: string;
+  @ManyToOne(() => ContentType, (cont) => cont.id)
+  type: string;
   @Column({
-    nullable: false,
+    default: null,
   })
   display_name: string;
   @CreateDateColumn()
@@ -26,7 +33,7 @@ export class Style {
   modified_at: Date;
 }
 @Entity()
-export class StyleContent {
+export class StyleBlogContent {
   @PrimaryGeneratedColumn()
   id: number;
   @ManyToOne(() => Style, (style) => style.id)

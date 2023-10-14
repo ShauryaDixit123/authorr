@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -18,23 +19,23 @@ export class Blog {
   })
   title: string;
   @Column({
-    nullable: false,
+    default: null,
   })
   description: string;
-  @Column({
-    nullable: false,
-  })
-  img_path: string;
   @ManyToOne(() => User, (user) => user.id)
-  posted_by: string;
+  posted_by: User;
   @Column({
     default: true,
   })
   is_active: boolean;
   @Column({
-    default: null,
+    default: 0,
   })
   likes: number;
+  @Column({
+    default: false,
+  })
+  is_published: boolean;
   @CreateDateColumn()
   created_at: Date;
   @UpdateDateColumn()
@@ -43,12 +44,20 @@ export class Blog {
 
 @Entity()
 export class ContentType {
-  @PrimaryGeneratedColumn()
-  id: number;
+  // id will be combination of name and type saperated by . or '-'
+  @PrimaryColumn({
+    unique: true,
+  })
+  id: string;
   @Column({
     nullable: false,
   })
   name: string;
+  @Column({
+    nullable: false,
+    default: 'BLOG',
+  })
+  type: string;
   @CreateDateColumn()
   created_at: Date;
   @UpdateDateColumn()
@@ -60,12 +69,12 @@ export class BlogContent {
   @PrimaryGeneratedColumn()
   id: number;
   @Column({
-    nullable: false,
+    default: null,
   })
   content: string;
   @ManyToOne(() => Blog, (blog) => blog.id)
   blog: string;
-  @ManyToOne(() => ContentType, (cont) => cont.id)
+  @ManyToOne(() => ContentType, (cont) => cont.name)
   type: string;
   @Column()
   slug: string;
@@ -136,7 +145,7 @@ export class BlogMedia {
   @ManyToOne(() => Blog, (blog) => blog.id)
   blog: string;
   @ManyToOne(() => BlogContent, (blog) => blog.id)
-  blog_content: string;
+  blogContent: number;
   @CreateDateColumn()
   created_at: Date;
   @UpdateDateColumn()
@@ -150,9 +159,7 @@ export class BlogHeirarchy {
   @ManyToOne(() => Blog, (blog) => blog.id)
   blog: string;
   @ManyToOne(() => BlogContent, (blog) => blog.id)
-  entity: number;
-  @Column()
-  nextentity: number;
+  parent: number;
   @CreateDateColumn()
   created_at: Date;
   @UpdateDateColumn()

@@ -9,6 +9,7 @@ import {
   ManyToOne,
   OneToMany,
   OneToOne,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -21,6 +22,44 @@ export class Tag {
     nullable: false,
   })
   name: string;
+  @CreateDateColumn()
+  created_at: Date;
+  @UpdateDateColumn()
+  modified_at: Date;
+}
+
+@Entity()
+export class Role {
+  @PrimaryColumn({
+    nullable: false,
+  })
+  name: string;
+  @CreateDateColumn()
+  created_at: Date;
+  @UpdateDateColumn()
+  modified_at: Date;
+}
+@Entity()
+export class Book {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+  @Column({
+    nullable: false,
+  })
+  title: string;
+  @Column({
+    nullable: true,
+  })
+  description: string;
+  @Column({
+    nullable: false,
+  })
+  hosted_url: string;
+  @Column({
+    nullable: false,
+    unique: true,
+  })
+  isbn: string;
   @CreateDateColumn()
   created_at: Date;
   @UpdateDateColumn()
@@ -63,14 +102,14 @@ export class User {
   })
   is_verified: boolean;
   @Column({
-    default: false,
+    default: true,
   })
   is_active: boolean;
   @Column()
   user_name: string;
-  @ManyToOne(() => Role, (role) => role.userRole)
+  @ManyToOne(() => Role, (role) => role.name)
   @JoinTable()
-  role: number;
+  role: Role;
   @CreateDateColumn()
   created_at: Date;
   @UpdateDateColumn()
@@ -119,54 +158,11 @@ export class AuthorDetailsBook {
   author_detail: string;
   @ManyToOne(() => Book, (book) => book.id)
   @JoinColumn()
-  book: string;
+  book: Book;
   @CreateDateColumn()
   created_at: Date;
   @UpdateDateColumn()
   modified_at: Date;
-}
-
-@Entity()
-export class Book {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-  @Column({
-    nullable: false,
-  })
-  title: string;
-  @Column({
-    nullable: true,
-  })
-  description: string;
-  @Column({
-    nullable: false,
-  })
-  hosted_url: string;
-  @Column({
-    nullable: false,
-    unique: true,
-  })
-  isbn: string;
-  @CreateDateColumn()
-  created_at: Date;
-  @UpdateDateColumn()
-  modified_at: Date;
-}
-
-@Entity()
-export class Role {
-  @PrimaryGeneratedColumn()
-  id: number;
-  @Column({
-    nullable: false,
-  })
-  name: string;
-  @CreateDateColumn()
-  created_at: Date;
-  @UpdateDateColumn()
-  modified_at: Date;
-  @OneToMany(() => User, (user) => user.id, { cascade: true })
-  userRole: User[];
 }
 
 @Entity()

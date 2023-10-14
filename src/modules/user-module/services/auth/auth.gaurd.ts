@@ -10,6 +10,13 @@ import { ExtractJwt } from 'passport-jwt';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { configService } from 'src/configs/config.service';
+import { UserModuleService } from '../users.service';
+import {
+  AUTHOR_ROLE,
+  INVALID_TOKEN,
+  TOKEN_NOT_FOUND,
+} from '../../constants/user.constant';
+import { ServerError } from 'src/common/exceptions/error';
 
 @Injectable()
 export class GoogleAuthGaurd extends AuthGuard('google') {}
@@ -22,7 +29,7 @@ export class JWTAuthGaurd extends AuthGuard('jwt') {}
 
 @Injectable()
 export class JWTActivateGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(protected readonly jwtService: JwtService) {}
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
@@ -40,5 +47,33 @@ export class JWTActivateGuard implements CanActivate {
       throw new UnauthorizedException('Invalid Token');
     }
     return true;
+  }
+}
+@Injectable()
+export class AuthorCanActivateGuard implements CanActivate {
+  constructor(
+    private readonly userService: UserModuleService,
+    private readonly jwtService: JwtService,
+  ) {}
+  canActivate(
+    context: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    const req = context.switchToHttp().getRequest();
+    try {
+      const { authorization } = req.headers;
+      const token = authorization.replace(/bearer/gim, '').trim();
+      if (!token) {
+        throw new ServerError(TOKEN_NOT_FOUND);
+      }
+      const user = this.jwtService.verify(token, {
+        secret: configService.getValue('JWT_SECRET'),
+      });
+      if (!user || user.role !== AUTHOR_ROLE) {
+        throw new ServerError(INVALID_TOKEN);
+      }
+      return true;
+    } catch (e) {
+      throw new ServerError(e.message || TOKEN_NOT_FOUND);
+    }
   }
 }
